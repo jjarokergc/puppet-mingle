@@ -1,6 +1,6 @@
 # Create accounts to build  mingle
 #
-class profile::mingle::accounts {
+class mingle::accounts {
   # Mingle Build Variables
   $b = lookup('mingle::build')
   $s = lookup('mingle::server')

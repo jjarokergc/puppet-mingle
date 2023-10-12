@@ -2,7 +2,7 @@
 # # Postgresql server or client is configured in Profile::Postgresql
 # Create mingle databases and user
 ##
-class profile::mingle::database {
+class mingle::database {
   # Variables
   $s = lookup('mingle::server') # Tomcat server parameters stored in Hiera
   $n = $s['instance']           # Mingle instance parameters

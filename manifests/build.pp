@@ -1,6 +1,6 @@
 # Set up Mingle development environment, build mingle, start server
 #
-class profile::mingle::build {
+class mingle::build {
   ###
   ###
   ### BUILD ENVIRONMENT
@@ -8,23 +8,23 @@ class profile::mingle::build {
   ###
 
   ### Create Accounts
-  include profile::mingle::accounts
+  include mingle::accounts
 
   ### Download Dependencies
   # Install Packages for Mingle build
-  include profile::mingle::packages
+  include mingle::packages
   # Enable Git access to mingle source repo
-  include profile::mingle::git
+  include mingle::git
   # Download source files using archive module... 
-  include profile::mingle::archive          # ...defined in 'archive::files'
+  include mingle::archive          # ...defined in 'archive::files'
   # Clone Repositories using vcsrpo module ...
-  include profile::mingle::vcsrepo          # ... defined in 'vcsrepo::repos'
+  include mingle::vcsrepo          # ... defined in 'vcsrepo::repos'
   # Create Mingle databases. Postgresql server is installed externally.
-  include profile::mingle::database
+  include mingle::database
   # Add highcharts to mingle
-  include profile::mingle::highcharts
+  include mingle::highcharts
   # Install NVM and node v8.16.2 for Mingle-Rails5
-  include profile::mingle::nvm
+  include mingle::nvm
 
   # Mingle Build Variables
   $b = lookup('mingle::build')

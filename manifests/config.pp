@@ -1,6 +1,6 @@
 # Mingle Configuration
 # Install config files
-class profile::mingle::config {
+class mingle::config {
   ### Variables
   # Tomcat Server Parameters
   $s = lookup('mingle::server')

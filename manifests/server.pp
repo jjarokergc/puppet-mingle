@@ -5,7 +5,7 @@
 # Depends upon 
 #   - profile::mingle::build
 #
-class profile::mingle::server {
+class mingle::server {
   ### Variables
   # Mingle Build Parameters
   $b = lookup('mingle::build')

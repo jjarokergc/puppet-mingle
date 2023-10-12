@@ -1,5 +1,5 @@
 # Install highcharts for Mingle
-class profile::mingle::highcharts {
+class mingle::highcharts {
   $b = lookup('mingle::build')    # Parameters located in hiera
   $h = $b['highcharts']           # Highchart build parameters hash
   $m = $b['account']              # Mingle account details

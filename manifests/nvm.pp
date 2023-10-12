@@ -2,7 +2,7 @@
 # - NVM 
 # - NodeJS
 # - Yarn
-class profile::mingle::nvm {
+class mingle::nvm {
   ### Variables
   $b = lookup('mingle::build')
 

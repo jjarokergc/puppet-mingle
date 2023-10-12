@@ -5,7 +5,7 @@
 # Loops across all repo definitions and all files within each repo
 #   Outer loop: repo host
 #   Innter loop: project
-class profile::mingle::vcsrepo {
+class mingle::vcsrepo {
   ### Variables
   $r = lookup('vcsrepo::repos')    # Repo 'r' is a datastructure in hiera
   $b = lookup('mingle::build')

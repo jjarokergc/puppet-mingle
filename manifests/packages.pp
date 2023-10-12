@@ -1,5 +1,5 @@
 # Install required packages for mingle build
-class profile::mingle::packages {
+class mingle::packages {
   include apt
   # Mingle build dependencies
   $p = lookup('apt::packages')

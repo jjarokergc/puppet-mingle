@@ -5,7 +5,7 @@
 # Loops across all repo definitions and all files within each repo
 #   Outer loop: 'repo_url'
 #   Innter loop: 'package_name'
-class profile::mingle::archive {
+class mingle::archive {
   include archive
 
   ### Variables

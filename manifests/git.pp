@@ -1,7 +1,7 @@
 # Install git
 # Add creditials to git repo for mingle download
 # NOTE: configuration parameters are applied by git from hiera
-class profile::mingle::git {
+class mingle::git {
   include git # Git config is defined in hiera git::configs, not here
 
   # Code Repo Keys
