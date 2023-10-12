@@ -1,0 +1,32 @@
+<%- | Hash $n, | -%>
+#!/bin/bash
+#
+# FILE MANAGED BY PUPPET
+#
+# $n - mingle::server['instance'] variables
+#
+# This file sets environment variables that are used for both tomcat
+# initialization and Mingle build scripts.
+#
+export CATALINA_HOME="<%= $n['catalina']['home'] %>"
+export CATALINA_BASE="<%= $n['catalina']['base'] %>"
+export CATALINA_OUT="${CATALINA_BASE}/<%= $n['catalina']['out'] %>"
+export CATALINA_PID="${CATALINA_BASE}/<%= $n['dir']['swap'] -%>/mingle.pid"
+
+export MINGLE_PORT="<%= $n['ports']['http'] %>"
+export MINGLE_DATA_DIR="${CATALINA_BASE}/<%= $n['dir']['data'] %>"
+export MINGLE_CONFIG_DIR="${CATALINA_BASE}/<%= $n['dir']['config'] %>"
+export MINGLE_LOG_DIR="${CATALINA_BASE}/<%= $n['dir']['log'] %>"
+export MINGLE_SWAP_DIR="${CATALINA_BASE}/<%= $n['dir']['swap'] %>"
+
+export JAVA_HOME="<%= $n['java']['home'] %>"
+
+JAVA_MEM="-Xms<%= $n['java']['xms'] %> -Xmx<%= $n['java']['xmx'] %>"
+JAVA_COMPILE='-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -noverify  -XX:NewSize=128m -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError'
+JAVA_LOGGING="-Dlog4j.configuration=${MINGLE_CONFIG_DIR}/log4j.properties -Dnet.spy.log.LoggerImpl=net.spy.memcached.compat.log.Log4JLogger -Dmingle.logDir=${MINGLE_LOG_DIR}"
+JAVA_CONFIG="-Djruby.compat.version=1.9 -Duser.language=en -Duser.country=US -Djava.awt.headless=true -Dfile.encoding=UTF-8"
+JAVA_DUAL_APP="-Dmingle.multiAppRoutingConfig=${CATALINA_BASE}/webapps/ROOT/WEB-INF/config/routes.yml -Dmingle.multiAppRoutingEnabled=true"
+JAVA_MINGLE_CONFIG="-Dmingle.port=${MINGLE_PORT} -Dmingle.dataDir=${MINGLE_DATA_DIR} -Dmingle.configDir=${MINGLE_CONFIG_DIR} -Dmingle.swapDir=${MINGLE_SWAP_DIR}"
+export JAVA_OPTS="${JAVA_MEM} ${JAVA_COMPILE} ${JAVA_CONFIG} ${JAVA_DUAL_APP} ${JAVA_MINGLE_CONFIG} ${JAVA_LOGGING}"
+
+export SECRET_KEY_BASE='d4435f934f47ec59d7def9740ef3dd3480eb36ffc54af561843f8225437289f61a08886da225dcf5dc9d0ba62c1e31e25ba192f7f5c2ee51769ad484b6fc5431'

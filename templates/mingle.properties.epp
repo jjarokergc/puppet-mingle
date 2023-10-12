@@ -1,0 +1,10 @@
+<%- | Hash $n, | -%>
+#Refer to the mingle.properties.example file in your Mingle installation folder to see other properties that can be set to configure Mingle
+-Dmingle.memcachedPort=11211
+-Dmingle.logDir=<%= $n['catalina']['base'] %>/<%= $n['dir']['log'] %>
+-Dmingle.swapDir=<%= $n['catalina']['base'] %>/<%= $n['dir']['swap'] %>
+-Dmingle.port=<%= $n['ports']['http'] %>
+-Dmingle.memcachedHost=127.0.0.1
+-Dmingle.appContext=/
+-Dmingle.siteURL=<%= $n['siteurl']['scheme'] -%>://<%= $n['siteurl']['fqdn'] -%><%unless $n['ports']['http']=='80'{-%>
+:<%= $n['ports']['http'] %> <% } %>

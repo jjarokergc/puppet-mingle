@@ -1,0 +1,14 @@
+<%- | Hash $n, | -%>
+#
+# FILE MANAGED BY PUPPET
+#
+# $n - mingle::server['instance'] variables
+#
+---
+<%= $n['environment'] %>: 
+  adapter: <%= $n['db']['adapter'] %>
+  driver: org.postgresql.Driver
+  username: <%= $n['db']['user'] %>
+  password: <%= $n['db']['password'] %>
+  url: '<%= $n['db']['uri'] %>://<%= $n['db']['host'] %>:<%= $n['db']['port'] %>/<%= $n['db']['name'] %>'
+  pool: 12

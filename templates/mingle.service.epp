@@ -1,0 +1,26 @@
+<%- | Hash $n, String $service_account | -%>
+#
+# FILE MANAGED BY PUPPET
+#
+# $n - mingle::server['instance'] variables
+# $service_account - Account that runs tomcat
+#
+[Unit]
+Description="Mingle Instance of Tomcat Server"
+After=syslog.target network.target
+
+[Service]
+Type=forking  
+PIDFile=<%= $n['catalina']['base'] -%>/<%= $n['dir']['swap'] -%>/mingle.pid
+
+User=<%= $service_account %>
+Group=<%= $service_account %>
+
+Environment="CATALINA_BASE=<%= $n['catalina']['base'] %>"
+Environment="CATALINA_HOME=<%= $n['catalina']['home'] %>"
+
+ExecStart=<%= $n['catalina']['home'] %>/bin/startup.sh
+ExecStop=<%= $n['catalina']['home'] %>/bin/shutdown.sh
+
+[Install]
+WantedBy=multi-user.target

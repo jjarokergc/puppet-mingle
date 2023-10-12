@@ -1,0 +1,48 @@
+<%- | Hash $n, | -%>
+#
+# FILE MANAGED BY PUPPET
+#
+# $n - mingle::server['instance'] variables
+#
+#  Copyright 2020 ThoughtWorks, Inc.
+#  
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Affero General Public License as
+#  published by the Free Software Foundation, either version 3 of the
+#  License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Affero General Public License for more details.
+#  
+#  You should have received a copy of the GNU Affero General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
+log4j.rootLogger=<%= $n['logging']['level'] %>, MINGLE_LOG_FILE
+
+log4j.appender.MINGLE_LOG_FILE=org.apache.log4j.RollingFileAppender
+log4j.appender.MINGLE_LOG_FILE.File=<%= $n['catalina']['base'] %>/<%= $n['dir']['log'] %>/mingle.log
+log4j.appender.MINGLE_LOG_FILE.MaxFileSize=10MB
+log4j.appender.MINGLE_LOG_FILE.MaxBackupIndex=10
+
+log4j.appender.MINGLE_LOG_FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.MINGLE_LOG_FILE.layout.ConversionPattern=[%-d{ISO8601}] [%t] [%c] %m%n
+
+log4j.logger.org.apache=<%= $n['logging']['level'] %>
+log4j.logger.org.mortbay.log=<%= $n['logging']['level'] %>
+log4j.logger.org.elasticsearch=<%= $n['logging']['level'] %>
+log4j.logger.org.apache.activemq=<%= $n['logging']['level'] %>
+log4j.logger.org.apache.activemq.spring=<%= $n['logging']['level'] %>
+# This class on 5.2 gives TransportDisposed error. Suppressing it.
+#   ref: http://issues.apache.org/activemq/browse/AMQ-2273, http://www.mail-archive.com/users@activemq.apache.org/msg12457.html
+log4j.logger.org.apache.activemq.AdvisoryConsumer=ERROR
+# This camel namespace emits a "NoClassDefFoundError: javax/xml/stream/XMLEventWriter" error on quick add a card.
+log4j.logger.org.apache.camel.impl.converter=ERROR
+log4j.logger.org.springframework=<%= $n['logging']['level'] %>
+# disable commons client warning
+log4j.logger.org.apache.commons.httpclient=ERROR
+log4j.logger.com.thoughtworks.mingle=<%= $n['logging']['level'] %>
+log4j.logger.com.thoughtworks.mingle.jobs=<%= $n['logging']['level'] %>
+log4j.logger.com.thoughtworks.mingle.pool=<%= $n['logging']['level'] %>
+log4j.logger.com.thoughtworks.mingle.servlet=<%= $n['logging']['level'] %>
+log4j.logger.com.thoughtworks.mingle.murmurs=<%= $n['logging']['level'] %>

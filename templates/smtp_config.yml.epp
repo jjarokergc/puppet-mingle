@@ -1,0 +1,18 @@
+<%- | Hash $s, | -%>
+#
+# FILE MANAGED BY PUPPET
+#
+# $s - mingle::server variables
+#
+---
+smtp_settings:
+  #authentication: 
+  address: <%= $s['smtp']['address'] %>
+  port: <%= $s['smtp']['port'] %>
+  domain: <%= $s['smtp']['domain'] %>
+  user_name: <%= $s['smtp']['user_name'] %>
+  password: <%= $s['smtp']['password'] %>
+  tls: <%= $s['smtp']['tls'] %>
+sender:
+  address: <%= $s['smtp']['sender_address'] %>
+  name: <%= $s['smtp']['sender_name'] %>
