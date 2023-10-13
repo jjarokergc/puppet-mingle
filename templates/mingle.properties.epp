@@ -6,5 +6,5 @@
 -Dmingle.port=<%= $n['ports']['http'] %>
 -Dmingle.memcachedHost=127.0.0.1
 -Dmingle.appContext=/
--Dmingle.siteURL=<%= $n['siteurl']['scheme'] -%>://<%= $n['siteurl']['fqdn'] -%><%unless $n['ports']['http']=='80'{-%>
-:<%= $n['ports']['http'] %> <% } %>
+-Dmingle.siteURL=<%= $n['siteurl']['scheme'] -%>://<%= $n['siteurl']['fqdn'] -%><%unless $n['siteurl']['port']=='80'{-%>
+:<%= $n['siteurl']['port'] %> <% } %>

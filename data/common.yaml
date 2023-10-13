@@ -1,4 +1,4 @@
-# Mingle Server Data
+# Mingle Module Data
 #
 ---
 # Data Merging Options
@@ -22,8 +22,6 @@ Anchor_paths:
   - &mingle_homedir  '/home/mingle' # Mingle user's home directory
   - &mingle_workspace 'src'         # Subdirectory for mingle checkout
   - &user_account 'mingle'          # System account that runs tomcat instance of mingle
-  - &listen_port '8080'             # Port that tomcat uses for mingle
-  - &fqdn 'mingle.example.com'      # External address for server
   - &highcharts 'highcharts-2.2.3'  # Highcharts version
   - &highcharts_ext 'zip'           # Used in download and installation
   - &ojdbc 'ojdbc6-11.2.0.4'
@@ -149,9 +147,10 @@ mingle::server:
     sender_address: 'mingle@example.com'
     sender_name: 'Mingle Server'
   instance: # Tomcat Instance
-    siteurl:
-      fqdn: *fqdn
+    siteurl: # External address for server. Used in mingle.properties.
+      fqdn: 'mingle.example.com'      
       scheme: 'http'
+      port: '8080' # External url port. May be different from Tomcat listen port.
     environment: 'production'  # Mingle environment: production, testing, development
     logging:
       level: 'WARN' # 'WARN'
@@ -163,9 +162,9 @@ mingle::server:
       home: '/opt/apps/jdk1.8.0_381' # Must point to JDK installation
       xms: '256m' # Initial memory allocation pool
       xmx: '4g'   # Max memory allocation pool for JVM
-    ports:
+    ports: # Tomcat ports
       base: '8005' # Shutdown command listen port
-      http: *listen_port # Server socket
+      http: '8080' # Tomcat server socket listen port. May be different from external URL port.
     dir: # Mingle data directories relative to CATALINA_BASE
       data: 'data' 
       config: 'conf' # 'data/config' 
