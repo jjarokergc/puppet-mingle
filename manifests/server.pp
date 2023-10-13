@@ -60,14 +60,15 @@ class mingle::server {
 
   ### MINGLE INSTANCE
   tomcat::instance { 'mingle':
-    catalina_home  => $catalina_home,
-    catalina_base  => $catalina_base,
-    require        => File['Mingle Unit File'],
-    service_name   => 'mingle',
-    use_init       => true,
-    manage_service => true,
-    user           => $t['user'],
-    group          => $t['user'],
+    catalina_home         => $catalina_home,
+    catalina_base         => $catalina_base,
+    require               => File['Mingle Unit File'],
+    service_name          => 'mingle',
+    use_init              => true,
+    manage_service        => true,
+    manage_copy_from_home => true, # Copy initial config files from tomcat to this instance
+    user                  => $t['user'],
+    group                 => $t['user'],
   }
   # Create tomcat-users.xml file
   # Required to silence log warning
@@ -88,7 +89,7 @@ class mingle::server {
   # Listen Socket
   # - removes 'redirectPort' because this instance only listens on http
   # - adds 'relaxed' attributes to allow mingle to use '[]' in urls, which is now bad practice
-  tomcat::config::server::connector { "mingle-http-${port['http']}": # Add new port
+  tomcat::config::server::connector { "mingle-http-${port['http']}": 
     catalina_base         => $catalina_base,
     port                  => $port['http'],     # Server socket port
     protocol              => 'HTTP/1.1',
@@ -98,6 +99,7 @@ class mingle::server {
       'relaxedPathChars'  => '[ ]',             # Mingle requires "relaxed path" characters
       'relaxedQueryChars' => '[ ]',
     },
+    require               => File["${catalina_base}/conf/server.xml"], # Added to solve a dependency problem in tomcat module
   }
   # Host Configuration 
   # - add the additional parameter 'deployOnStartup: false' for faster restarts
@@ -110,7 +112,7 @@ class mingle::server {
     additional_attributes => {
       'deployOnStartup' => 'false',             # Do not redeploy war when server restarts; redeploy only when war is first installed
     },
-    require               => Tomcat::Instance['mingle'], # Added to solve a dependency problem in tomcat module
+    require               => File["${catalina_base}/conf/server.xml"], # Added to solve a dependency problem in tomcat module
   }
   # Log Configuration
   # - use '.log' suffix (not '.txt')
@@ -124,6 +126,7 @@ class mingle::server {
       'suffix'    => '.log',
       'pattern'   => '%h %l %u %t &quot;%r&quot; %s %b',
     },
+    require               => File["${catalina_base}/conf/server.xml"], # Added to solve a dependency problem in tomcat module
   }
 
   ### MINGLE APP
