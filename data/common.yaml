@@ -8,12 +8,31 @@ lookup_options:
     merge:
       strategy: deep
       merge_hash_arrays: true
+  mingle::build:
+    merge:
+      strategy: deep
+      merge_hash_arrays: true
+  mingle::server:
+    merge:
+      strategy: deep
+      merge_hash_arrays: true
 
+Anchor_paths: 
+  - &apps '/opt/apps'               # Directory to install mingle dependencies
+  - &mingle_homedir  '/home/mingle' # Mingle user's home directory
+  - &mingle_workspace 'src'         # Subdirectory for mingle checkout
+  - &user_account 'mingle'          # System account that runs tomcat instance of mingle
+  - &listen_port '8080'             # Port that tomcat uses for mingle
+  - &fqdn 'mingle.example.com'      # External address for server
+  - &highcharts 'highcharts-2.2.3'  # Highcharts version
+  - &highcharts_ext 'zip'           # Used in download and installation
+  - &ojdbc 'ojdbc6-11.2.0.4'
 
 ### Mingle Dependencies
 # Required packages
 mingle::dependencies:
-  packages: # Packages installed via mingle::packages
+# Packages installed via mingle::packages
+  packages: 
   - wget
   - bzip2
   - unzip
@@ -21,3 +40,171 @@ mingle::dependencies:
   - ant
   - make
   - g++
+# Archived software
+  archives:
+  # The following exist on a private FTP server and
+  # must be recreated on a public download site
+    # - repo_url: 'ftp://10.10.10.9'
+    #   user: 'user'
+    #   password: 'password'
+    #   files:
+    #     - package_name: 'jdk-8u381-linux-x64'
+    #       package_ext: 'tar.gz'
+    #       repo_path: '/Source/Linux/oracle/'
+    #       install_path: *apps
+    #       checksum_type: 'sha256'
+    #       checksum: '036aeb193d4262e27c74d9ade316dc50a026fba0255467d12fc73db49d20ce8c'
+    #       creates: 'jdk1.8.0_381/COPYRIGHT'
+    #       chown: 'root:root'
+    #       symlink:
+    #         path: '/usr/bin/java'
+    #         target: '/opt/apps/jdk1.8.0_381/jre/bin/java'
+    #     - package_name: &ojdbc 'ojdbc6-11.2.0.4'
+    #       package_ext: 'jar'
+    #       repo_path: '/Source/Linux/oracle/'
+    #       install_path: *apps
+    #       extract: false
+    #       checksum_type: 'md5'
+    #       checksum: '76852c42c44401f44d26319a74e55f5b'
+    #       creates: 'ojdbc6-11.2.0.4.jar'
+    #       chown: 'root:root'
+    #       symlink:
+    #         path: 
+    #         target: 
+    #     - package_name: 'phantomjs-2.1.1-linux-x86_64'
+    #       package_ext: 'tar.bz2'
+    #       repo_path: '/Source/Linux/Mingle/'
+    #       install_path: *apps
+    #       checksum_type: 
+    #       checksum: 
+    #       creates: 'phantomjs-2.1.1-linux-x86_64'
+    #       chown: 'root:root'
+    #       symlink:
+    #         path: '/usr/bin/phantomjs'
+    #         target: '/opt/apps/phantomjs-2.1.1-linux-x86_64/bin/phantomjs'
+    #     - package_name: &highcharts 'highcharts-2.2.3'
+    #       package_ext: &highcharts_ext 'zip'
+    #       repo_path: '/Source/Linux/Mingle/'
+    #       install_path: *apps
+    #       checksum_type: 
+    #       checksum: 
+    #       creates: *highcharts
+    #       chown: 'root:root'
+    #       symlink:
+    #         path: 
+    #         target: 
+# Repositories to clone
+# The following exists on a private git account and
+# must be recreated on a public download site
+  repos:
+    # - url: 'http://git.example.com'
+    #   repos:
+    #     - project: 'puppet/mingle/source/mingle.git'
+    #       branch:
+    #       path: *mingle_homedir 
+    #       dir: *mingle_workspace
+
+
+### Mingle Build
+mingle::build:
+  links: # Libraries to link into mingle's build workspace
+    - target: '/opt/apps/ojdbc6-11.2.0.4.jar'
+      subdir: 'mingle/vendor/java/ojdbc6.jar' # relative to checkout directory
+    - target: '/opt/apps/ojdbc6-11.2.0.4.jar'
+      subdir: 'mingle-rails5/vendor/java/ojdbc6.jar' 
+  highcharts:         # parameters for highcharts build
+    name: *highcharts
+    ext:  *highcharts_ext
+    path: *apps
+    ant_creates: 'build/dist/Highcharts-2.2.3.zip'  # file created by 'ant build'
+    install_path: 'mingle/public/javascripts'
+    install_dir: Highcharts-2.2.3
+  account:
+    user: *user_account          # User account for checkout and building
+    workspace: *mingle_workspace       # Name of checkout directory
+    homedir: *mingle_homedir          # Same as build user's home account
+    comment: 'Mingle Build User'
+  rails2:
+    build_creates: 'ROOT.war'   # Name of WAR file created by installer
+  rails5:
+    node_version: '8.16.2'
+    build_creates: 'rails_5.war'  # Name of second war file created by installer
+
+### Mingle Server
+mingle::server:
+  tomcat: # Tomcat Server
+    version: '8.5.94'
+    install_dir: *apps  # Creates a version-specific installation directory
+    source: 'https://dlcdn.apache.org/tomcat/tomcat-8/vVER/bin/apache-tomcat-VER.tar.gz'
+    path: &tomcat8_home '/opt/tomcat' # Link to version-specific directory. 
+    user: *user_account # Account that runs tomcat server
+    comment: 'Service account to run mingle'
+  smtp:
+    address: 'mail.example.com'
+    port: '25'
+    domain: 'example.com'
+    user_name: 'mingle@example.com'
+    password: 'password'
+    tls: 
+    sender_address: 'mingle@example.com'
+    sender_name: 'Mingle Server'
+  instance: # Tomcat Instance
+    siteurl:
+      fqdn: *fqdn
+      scheme: 'http'
+      aliases: # Other network names that resolve to the IP of this instance
+#        - 'mingle.localdomain'
+    environment: 'production'  # Mingle environment: production, testing, development
+    logging:
+      level: 'WARN' # 'WARN'
+    catalina:
+      home: *tomcat8_home
+      base: '/opt/mingle'
+      out: 'logs/dual_app.log' # Relative to catalina_base
+    java:
+      home: '/opt/apps/jdk1.8.0_381' # Must point to JDK installation
+      xms: '256m' # Initial memory allocation pool
+      xmx: '4g'   # Max memory allocation pool for JVM
+    ports:
+      base: '8005' # Shutdown command listen port
+      http: *listen_port # Server socket
+    dir: # Mingle data directories relative to CATALINA_BASE
+      data: 'data' 
+      config: 'conf' # 'data/config' 
+      log: 'logs'   
+      swap: 'temp' #'data/tmp'
+    db:
+      adapter: 'postgresql' # Alternative: jdbc
+      uri: 'jdbc:postgresql'
+      host: 'database_server.domain'
+      port: '5432'
+      name: 'mingle_production' 
+      user: 'mingle_db_user'
+      password: 'ThisIsMinglePassword01'
+
+### GIT CONFIG parameters for git module. 
+# These parameters are automatically loaded from Hiera by the puppet git module
+# This git account is used for local development of mingle with a gitlab-based repo
+#
+# Disabled here and re-enabled on node that is used for mingle development
+#
+# git::configs:
+#   user.name:
+#     value: 'Mingle Server'
+#     user: *user_account
+#     scope: 'global'
+#   user.email:
+#     value: 'mingle@example.com'
+#     user: *user_account
+#     scope: 'global'
+#   ### GITLAB INTEGRATION
+#   # Error: server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile
+#   # git config --global http.sslVerify false
+#   http.sslVerify:
+#     value: 'false'
+#     user: *user_account
+#     scope: 'global'
+#   core.filemode:
+#     value: 'false'
+#     user: *user_account
+#     scope: 'global'

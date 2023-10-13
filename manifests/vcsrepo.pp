@@ -7,7 +7,8 @@
 #   Innter loop: project
 class mingle::vcsrepo {
   ### Variables
-  $r = lookup('vcsrepo::repos')    # Repo 'r' is a datastructure in hiera
+  $d = lookup('mingle::dependencies')
+  $r = $d['repos']    # Repo 'r' is a datastructure in hiera
   $b = lookup('mingle::build')
   $account = $b['account']
 

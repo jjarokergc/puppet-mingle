@@ -9,7 +9,8 @@ class mingle::archive {
   include archive
 
   ### Variables
-  $f = lookup('archive::files')    # Repo 'f' is a datastructure in hiera
+  $d = lookup('mingle::dependencies')
+  $f = $d['archives']                     # 'f' is a datastructure in hiera
 
   $f.each | $i, $v | {
     # For each Repository
