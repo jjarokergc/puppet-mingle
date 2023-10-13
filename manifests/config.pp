@@ -28,7 +28,7 @@ class mingle::config {
     group   => 'root',
     mode    => '0640',
     path    => '/etc/systemd/system/mingle.service',
-    content => epp('mingle.service.epp', {
+    content => epp('mingle/mingle.service.epp', {
         'n'               => $n,
         'service_account' => $tomcat['user'],
     }, ),
@@ -37,30 +37,30 @@ class mingle::config {
   # Environment variables are defined in setenv
   file { 'Mingle Environment Variables':
     path    => "${catalina_base}/bin/setenv.sh",
-    content => epp('mingle.setenv.sh.epp', { 'n' => $n, }),
+    content => epp('mingle/mingle.setenv.sh.epp', { 'n' => $n, }),
     *       => $common_attributes,
   }
 
   file { 'Mingle Log4J Properties':
     path    => "${config_dir}/log4j.properties",
-    content => epp('log4j.properties.epp', { 'n' => $n, }),
+    content => epp('mingle/log4j.properties.epp', { 'n' => $n, }),
     *       => $common_attributes,
   }
 
   file { 'Mingle Database Config':
     path    => "${config_dir}/database.yml",
-    content => epp('database.yml.epp', { 'n' => $n, }),
+    content => epp('mingle/database.yml.epp', { 'n' => $n, }),
     *       => $common_attributes,
   }
   file { 'Mingle SMTP Config':
     path    => "${config_dir}/smtp_config.yml",
-    content => epp('smtp_config.yml.epp', { 's' => $s, }),
+    content => epp('mingle/smtp_config.yml.epp', { 's' => $s, }),
     *       => $common_attributes,
   }
   file { 'Mingle Properties':
     path    => "${config_dir}/mingle.properties",
     replace => false, # Create the initial file but allow Mingle to manage it
-    content => epp('mingle.properties.epp', { 'n' => $n, }),
+    content => epp('mingle/mingle.properties.epp', { 'n' => $n, }),
     *       => $common_attributes,
   }
 }

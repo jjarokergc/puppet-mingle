@@ -1,0 +1,23 @@
+# Mingle Server Data
+#
+---
+# Data Merging Options
+# (Over-ride these defaults by using an environment-specific data file)
+lookup_options:
+  mingle::dependencies:
+    merge:
+      strategy: deep
+      merge_hash_arrays: true
+
+
+### Mingle Dependencies
+# Required packages
+mingle::dependencies:
+  packages: # Packages installed via mingle::packages
+  - wget
+  - bzip2
+  - unzip
+  - libfontconfig1
+  - ant
+  - make
+  - g++

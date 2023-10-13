@@ -1,9 +1,8 @@
 # Class: Profile Mingle Server
-# Install Tomcat
+# Install and configure Tomcat
 # Deploy WAR file
 # Start mingle instance
-# Depends upon 
-#   - profile::mingle::build
+# Depends upon mingle::build
 #
 class mingle::server {
   ### Variables
@@ -21,19 +20,19 @@ class mingle::server {
   $tomcat_install_dir = "${t['install_dir']}/tomcat-${tomcat_version}"  # Ex: /opt/apps/tomcat-8.5.93
 
   # Mingle Instance
-  $catalina_home = $n['catalina']['home'] # Ex: /opt/tomcat
-  $catalina_base = $n['catalina']['base'] # Ex: /opt/mingle
+  $catalina_home = $n['catalina']['home']                 # Ex: /opt/tomcat
+  $catalina_base = $n['catalina']['base']                 # Ex: /opt/mingle
   $config_dir = "${catalina_base}/${n['dir']['config']}"  # Ex: /opt/mingle/conf
-  $java_home = $n['java']['home']  # Points to JDK
+  $java_home = $n['java']['home']                         # Points to JDK
   $port = $n['ports']
 
   # Mingle WAR Files
-  $mingle_home_dir = $b['account']['homedir']                   # Mingle user's home directory, Ex: /home/jjaroker
+  $mingle_home_dir = $b['account']['homedir']                       # Mingle user's home directory, Ex: /home/jjaroker
   $mingle_dir = "${mingle_home_dir}/${b['account']['workspace']}"   # Checkout directory, Ex: /home/jjaroker/mingle
-  $mingle_workingdir = "${mingle_dir}/mingle" # Where scripts are executed Ex: /home/jjaroker/mingle/mingle
-  $war_file = $b['rails2']['build_creates']                     # Mingle WAR File, Ex ROOT.war
+  $mingle_workingdir = "${mingle_dir}/mingle"                       # Where scripts are executed Ex: /home/jjaroker/mingle/mingle
+  $war_file = $b['rails2']['build_creates']                         # Mingle WAR File, Ex ROOT.war
   $war_source = "${mingle_workingdir}/${war_file}"
-  $war_rails5_file = $b['rails5']['build_creates']              # Mingle Rails5 File, Ex: rails_5.war
+  $war_rails5_file = $b['rails5']['build_creates']                  # Mingle Rails5 File, Ex: rails_5.war
   $war_rails5_source = "${mingle_workingdir}/${war_rails5_file}"
 
   ### TOMCAT SERVER
@@ -54,9 +53,9 @@ class mingle::server {
     ensure  => link,
     path    => $tomcat_path,
     target  => $tomcat_install_dir,
-    require => Tomcat::Install[$tomcat_install_dir],
     owner   => $t['user'],
     group   => $t['user'],
+    require => Tomcat::Install[$tomcat_install_dir],
   }
 
   ### MINGLE INSTANCE
@@ -81,39 +80,54 @@ class mingle::server {
     owner         => $t['user'],
     group         => $t['user'],
   }
-  # Change the default port of this instance
+  # Server Attributes
   tomcat::config::server { 'mingle':
     catalina_base => $catalina_base,
     port          => $port['base'], # Port to listen for shutdown command
   }
-  # Listen
+  # Listen Socket
+  # - removes 'redirectPort' because this instance only listens on http
+  # - adds 'relaxed' attributes to allow mingle to use '[]' in urls, which is now bad practice
   tomcat::config::server::connector { "mingle-http-${port['http']}": # Add new port
     catalina_base         => $catalina_base,
-    port                  => $port['http'],  # Server socket port
+    port                  => $port['http'],     # Server socket port
     protocol              => 'HTTP/1.1',
     purge_connectors      => true,
+    attributes_to_remove  => ['redirectPort'],  # This instance is behind a reverse proxy and only listens on http
     additional_attributes => {
-#      'redirectPort'      => $port['redirect'],
-      'relaxedPathChars'  => '[ ]', # Mingle requires "relaxed path" characters
+      'relaxedPathChars'  => '[ ]',             # Mingle requires "relaxed path" characters
       'relaxedQueryChars' => '[ ]',
     },
   }
-  # Host Configuration
-  # To speed-up restarting mingle when WAR files are unchanged
-  tomcat::config::server::host { 'Mingle Redeploy on Startup':
+  # Host Configuration 
+  # - add the additional parameter 'deployOnStartup: false' for faster restarts
+  tomcat::config::server::host { 'Mingle Host':
     catalina_base         => $catalina_base,
-    host_name             => $n['siteurl']['fqdn'], #'localhost', # Network name of the virtual host
+    host_name             => 'localhost',       # Name of the host to match
     app_base              => 'webapps',
+    parent_service        => 'Catalina',        # Name attribute of Service element that contains this host stanza
     host_ensure           => 'present',
     additional_attributes => {
-      'unpackWARs'      => 'true',
-      'autoDeploy'      => 'true',  # Deploy on a running tomcat server
-      'deployOnStartup' => 'false', # Not necessary to redeploy war when server restarts; redeploy only when war is first installed
+      'deployOnStartup' => 'false',             # Do not redeploy war when server restarts; redeploy only when war is first installed
     },
-    require               => Tomcat::Instance['mingle'], # Appears to be a dependency problem in tomcat module
+    require               => Tomcat::Instance['mingle'], # Added to solve a dependency problem in tomcat module
+  }
+  # Log Configuration
+  # - use '.log' suffix (not '.txt')
+  tomcat::config::server::valve { 'Mingle Access Log':
+    catalina_base         => $catalina_base,
+    parent_host           => 'localhost',
+    class_name            => 'org.apache.catalina.valves.AccessLogValve',
+    additional_attributes => {
+      'directory' => 'logs',
+      'prefix'    => 'localhost_access_log',
+      'suffix'    => '.log',
+      'pattern'   => '%h %l %u %t &quot;%r&quot; %s %b',
+    },
   }
 
   ### MINGLE APP
+  # - deploy mingle and rails5 war files that are produced by mingle::build
   tomcat::war { $war_file:
     war_source    => $war_source,
     catalina_base => $catalina_base,
