@@ -152,8 +152,6 @@ mingle::server:
     siteurl:
       fqdn: *fqdn
       scheme: 'http'
-      aliases: # Other network names that resolve to the IP of this instance
-#        - 'mingle.localdomain'
     environment: 'production'  # Mingle environment: production, testing, development
     logging:
       level: 'WARN' # 'WARN'
